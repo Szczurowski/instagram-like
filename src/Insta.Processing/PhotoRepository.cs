@@ -86,8 +86,16 @@ namespace Insta.Processing
 
         public async Task Add(Photo photo)
         {
-            var commandText = $@"INSERT INTO [dbo].[T_Photo] ([{ParamName}], [{ParamOriginalContent}], [{ParamThumbnailContent}])
-	                             VALUES(@{ParamName}, CAST(@{ParamOriginalContent} as varbinary(max)), CAST(@{ParamThumbnailContent} as varbinary(max)))";
+            var commandText = $@"INSERT INTO [dbo].[T_Photo] (
+                                    [{ParamName}],
+                                    [{ParamVisionAnalysis}], 
+                                    [{ParamOriginalContent}], 
+                                    [{ParamThumbnailContent}])
+	                             VALUES(
+                                    @{ParamName}, 
+                                    @{ParamVisionAnalysis},
+                                    CAST(@{ParamOriginalContent} as varbinary(max)), 
+                                    CAST(@{ParamThumbnailContent} as varbinary(max)))";
 
             using (var connection = new SqlConnection(_webConfiguration.ConfigurationString))
             {
@@ -96,6 +104,7 @@ namespace Insta.Processing
                     connection.Open();
 
                     command.Parameters.AddWithValue($"@{ParamName}", photo.Name);
+                    command.Parameters.AddWithValue($"@{ParamVisionAnalysis}", photo.VisionAnalysis);
                     command.Parameters.AddWithValue($"@{ParamOriginalContent}", photo.OriginalContent);
                     command.Parameters.AddWithValue($"@{ParamThumbnailContent}", 
                         (object)photo.ThumbnailContent ?? DBNull.Value);

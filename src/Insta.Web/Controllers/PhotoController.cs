@@ -7,6 +7,7 @@ using Insta.Processing;
 using Insta.Web.Models;
 using Domain = Insta.Processing.Domain;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Insta.Web.Controllers
 {
@@ -14,9 +15,13 @@ namespace Insta.Web.Controllers
     public class PhotoController : Controller
     {
         private readonly IPhotoRepository _repository;
+        private readonly IImageProcessor _imageProcessor;
 
-        public PhotoController(IPhotoRepository repository)
+        public PhotoController(
+            IPhotoRepository repository,
+            IImageProcessor imageProcessor)
         {
+            _imageProcessor = imageProcessor;
             _repository = repository;
         }
 
@@ -28,7 +33,7 @@ namespace Insta.Web.Controllers
             return Result<PhotoDetailed>.Success(MapToDetailed(photo));
         }
 
-        [HttpGet("original/{Id}")]
+        [HttpGet("{Id}/original")]
         public async Task<IActionResult> GetOriginal(int id)
         {
             var content = await _repository.GetGetOriginal(id);
@@ -37,7 +42,7 @@ namespace Insta.Web.Controllers
             return File(content, "image/jpeg");
         }
 
-        [HttpGet("thumbnail/{Id}")]
+        [HttpGet("{Id}/thumbnail")]
         public async Task<IActionResult> GetThumbnail(int id)
         {
             var content = await _repository.GetGetThumbnail(id);
@@ -63,6 +68,8 @@ namespace Insta.Web.Controllers
                 await Request.Body.CopyToAsync(memory);
             }
 
+            var visionAnalysis = await _imageProcessor.ProcessPhoto(originalContent);
+
             var filename = Request.Headers["x-filename"];
 
             await _repository.Add(new Domain.Photo
@@ -70,7 +77,7 @@ namespace Insta.Web.Controllers
                 Name = filename,
                 OriginalContent = originalContent,
                 ThumbnailContent = null,
-                VisionAnalysis = "{}"
+                VisionAnalysis = visionAnalysis
             });
 
             return Result.Success();
@@ -97,8 +104,8 @@ namespace Insta.Web.Controllers
                 ProcessingAnalysisResult = Convert(photo.VisionAnalysis)
             };
 
-        // TODO: implement JSON->Object converter
-        private ProcessingAnalysisResult Convert(string raw) =>
-            new ProcessingAnalysisResult();
+        private ProcessingAnalysisResult Convert(string raw) => string.IsNullOrEmpty(raw)
+            ? null
+            : JsonConvert.DeserializeObject<ProcessingAnalysisResult>(raw);
     }
 }

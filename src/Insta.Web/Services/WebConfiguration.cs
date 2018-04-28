@@ -13,5 +13,9 @@ namespace Insta.Web.Services
         }
 
         public string ConfigurationString => _aspnetConfiguration.GetConnectionString("Default");
+
+        public string VisionApiSubscriptionKey => _aspnetConfiguration["VisionApi:SubscriptionKey"];
+
+        public string VisionApiUriBase => _aspnetConfiguration["VisionApi:UriBase"];
     }
 }

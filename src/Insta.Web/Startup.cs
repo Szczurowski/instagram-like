@@ -30,6 +30,7 @@ namespace Insta.Web
             services.AddMvc();
             services.AddSingleton<IWebConfiguration, WebConfiguration>();
             services.AddTransient<IPhotoRepository, PhotoRepository>();
+            services.AddTransient<IImageProcessor, ImageProcessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
