@@ -1,4 +1,6 @@
-﻿namespace Insta.Processing.Domain
+﻿using System.Net.Security;
+
+namespace Insta.Processing.Domain
 {
     public class Photo
     {
@@ -6,9 +8,9 @@
 
         public string Name { get; set; }
 
-        public string OriginalLocation { get; set; }
+        public byte[] OriginalContent { get; set; }
 
-        public string ThumbnailLocation { get; set; }
+        public byte[] ThumbnailContent { get; set; }
 
         public string VisionAnalysis { get; set; }
     }

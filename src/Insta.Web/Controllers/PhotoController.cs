@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Insta.Processing;
 using Insta.Web.Models;
-using Microsoft.AspNetCore.Http;
 using Domain = Insta.Processing.Domain;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,61 +13,87 @@ namespace Insta.Web.Controllers
     [Route("api/[controller]")]
     public class PhotoController : Controller
     {
-        private static readonly Domain.Photo[] Photos = {
-            new Domain.Photo(),
-            new Domain.Photo()
-        };
+        private readonly IPhotoRepository _repository;
+
+        public PhotoController(IPhotoRepository repository)
+        {
+            _repository = repository;
+        }
 
         [HttpGet("{id}")]
-        public Result<PhotoDetailed> Get(int id)
+        public async Task<Result<PhotoDetailed>> Get(int id)
         {
-            var photo = Photos.First();
-            photo.Id = id;
+            var photo = await _repository.Get(id);
 
             return Result<PhotoDetailed>.Success(MapToDetailed(photo));
         }
 
-        [HttpGet]
-        public Result<IEnumerable<Photo>> GetAll()
+        [HttpGet("original/{Id}")]
+        public async Task<IActionResult> GetOriginal(int id)
         {
-            return Result<IEnumerable<Photo>>.Success(Photos.Select(Map));
+            var content = await _repository.GetGetOriginal(id);
+
+            // TODO: add ContentType to Entity
+            return File(content, "image/jpeg");
+        }
+
+        [HttpGet("thumbnail/{Id}")]
+        public async Task<IActionResult> GetThumbnail(int id)
+        {
+            var content = await _repository.GetGetThumbnail(id);
+
+            // TODO: add ContentType to Entity
+            return File(content, "image/jpeg");
+        }
+
+        [HttpGet]
+        public async Task<Result<IEnumerable<Photo>>> GetAll()
+        {
+            var photos = await _repository.GetAll();
+
+            return Result<IEnumerable<Photo>>.Success(photos.Select(Map));
         }
 
         [HttpPost]
         public async Task<Result> Upload()
         {
-            var content = new byte[Request.ContentLength.GetValueOrDefault()];
-            using (var memory = new MemoryStream(content))
+            var originalContent = new byte[Request.ContentLength.GetValueOrDefault()];
+            using (var memory = new MemoryStream(originalContent))
             {
                 await Request.Body.CopyToAsync(memory);
             }
 
             var filename = Request.Headers["x-filename"];
 
+            await _repository.Add(new Domain.Photo
+            {
+                Name = filename,
+                OriginalContent = originalContent,
+                ThumbnailContent = null,
+                VisionAnalysis = "{}"
+            });
+
             return Result.Success();
         }
 
-        // TODO: Implement
-        [HttpGet("preview/{Id}")]
-        public Result<byte[]> Download(int id)
-        {
-            return Result<byte[]>.Failure("Not implemented yet");
-        }
-
-        private Photo Map(Domain.Photo photo) =>
-            new Photo
+        // TODO: move to mapper
+        private Photo Map(Domain.Photo photo) => photo == null
+            ? null
+            : new Photo
             {
                 Id = photo.Id,
                 Name = photo.Name,
-                ThumbnailLocation = photo.ThumbnailLocation
+                ThumbnailLocation = $"/api/photo/thumbnail/{photo.Id}"
             };
 
-        private PhotoDetailed MapToDetailed(Domain.Photo photo) =>
-            new PhotoDetailed
+        // TODO: move to mapper
+        private PhotoDetailed MapToDetailed(Domain.Photo photo) => photo == null
+            ? null 
+            : new PhotoDetailed
             {
                 Id = photo.Id,
                 Name = photo.Name,
-                OriginalLocation = photo.OriginalLocation,
+                OriginalLocation = $"/api/photo/original/{photo.Id}",
                 ProcessingAnalysisResult = Convert(photo.VisionAnalysis)
             };
 

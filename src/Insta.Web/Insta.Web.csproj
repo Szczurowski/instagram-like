@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Insta.Common\Insta.Common.csproj" />
     <ProjectReference Include="..\Insta.Processing\Insta.Processing.csproj" />
   </ItemGroup>
 

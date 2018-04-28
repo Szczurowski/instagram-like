@@ -4,11 +4,15 @@ using System.Threading.Tasks;
 
 namespace Insta.Processing
 {
-    public interface IImageRepository
+    public interface IPhotoRepository
     {
         Task<IEnumerable<Photo>> GetAll();
 
         Task<Photo> Get(int id);
+
+        Task<byte[]> GetGetOriginal(int id);
+
+        Task<byte[]> GetGetThumbnail(int id);
 
         Task Add(Photo photo);
     }

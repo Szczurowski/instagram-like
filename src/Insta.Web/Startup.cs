@@ -2,11 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Insta.Common;
+using Insta.Processing;
+using Insta.Processing.Domain;
+using Insta.Web.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Insta.Web
 {
@@ -23,6 +28,8 @@ namespace Insta.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+            services.AddSingleton<IWebConfiguration, WebConfiguration>();
+            services.AddTransient<IPhotoRepository, PhotoRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
