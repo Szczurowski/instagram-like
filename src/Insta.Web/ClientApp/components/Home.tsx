@@ -26,7 +26,10 @@ export class Home extends React.Component<RouteComponentProps<{}>, {}> {
             fetch('api/Photo',
                     {
                         body: file,
-                        method: 'POST'
+                        method: 'POST',
+                        headers: {
+                            'x-filename': file.name
+                        }
                     })
                 .then(response => {
                     if (!response.ok) {

@@ -42,6 +42,8 @@ namespace Insta.Web.Controllers
                 await Request.Body.CopyToAsync(memory);
             }
 
+            var filename = Request.Headers["x-filename"];
+
             return Result.Success();
         }
 
