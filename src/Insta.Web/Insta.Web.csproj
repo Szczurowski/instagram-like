@@ -21,8 +21,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\components\Details.tsx" />
+    <None Remove="ClientApp\types\common.tsx" />
+    <None Remove="ClientApp\types\photo.tsx" />
+    <None Remove="ClientApp\types\photoDetailed.tsx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Insta.Common\Insta.Common.csproj" />
     <ProjectReference Include="..\Insta.Processing\Insta.Processing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\components\Details.tsx" />
+    <TypeScriptCompile Include="ClientApp\types\common.tsx" />
+    <TypeScriptCompile Include="ClientApp\types\photo.tsx" />
+    <TypeScriptCompile Include="ClientApp\types\photoDetailed.tsx" />
   </ItemGroup>
 
   <Target Name="DebugRunWebpack" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('wwwroot\dist') ">

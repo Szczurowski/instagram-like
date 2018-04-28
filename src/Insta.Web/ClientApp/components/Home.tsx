@@ -1,26 +1,62 @@
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
+import { Link } from "react-router-dom";
 import 'isomorphic-fetch';
+import { Result } from "../types/common";
+import { Photo } from "../types/photo"
 
-export class Home extends React.Component<RouteComponentProps<{}>, {}> {
+interface PhotoState {
+    content: Photo[];
+    isLoading: boolean;
+}
+
+export class Home extends React.Component<RouteComponentProps<{}>, PhotoState> {
     constructor(props: any) {
         super(props);
         this.handleChange = this.handleChange.bind(this);
+        this.state = { content: [], isLoading: true }
+    }
+
+    componentDidMount() {
+        fetch('api/photo')
+            .then(response => response.json() as Promise<Result<Photo[]>>)
+            .then(({ content }) => {
+                console.log(content);
+                this.setState({ content, isLoading: false });
+            });
     }
 
     render() {
-        return <div>
-            <h1>Hello, world!</h1>
+        const { content } = this.state;
 
+        return <div>
+            <h1>Upload an image for analysis</h1>
+            
             <div>
                 <input type="file" onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.handleChange(e.target.files)} />
-           </div>
+            </div>
+            <div>
+                <table className="table">
+                    <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Link</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {content.map(photo => 
+                        <tr>
+                            <td>{photo.id}</td>
+                            <td><Link to={`/photoDetails/${photo.id}`}>{photo.name}</Link></td>
+                        </tr>
+                    )}
+                    </tbody>
+                </table>
+            </div>
         </div>;
     }
 
     private handleChange(selectorFiles: FileList | null) {
-        console.log(selectorFiles);
-
         if (selectorFiles != null) {
             const file = selectorFiles[0];
             fetch('api/Photo',
@@ -44,11 +80,4 @@ export class Home extends React.Component<RouteComponentProps<{}>, {}> {
                 });
         }
     }
-}
-
-interface WeatherForecast {
-    dateFormatted: string;
-    temperatureC: number;
-    temperatureF: number;
-    summary: string;
 }

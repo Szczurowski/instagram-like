@@ -30,7 +30,9 @@ namespace Insta.Web.Controllers
         {
             var photo = await _repository.Get(id);
 
-            return Result<PhotoDetailed>.Success(MapToDetailed(photo));
+            var photoMapped = MapToDetailed(photo);
+
+            return Result<PhotoDetailed>.Success(photoMapped);
         }
 
         [HttpGet("{Id}/original")]
@@ -44,7 +46,9 @@ namespace Insta.Web.Controllers
         {
             var photos = await _repository.GetAll();
 
-            return Result<IEnumerable<Photo>>.Success(photos.Select(Map));
+            var photosMapped = photos.Select(Map);
+
+            return Result<IEnumerable<Photo>>.Success(photosMapped);
         }
 
         [HttpPost]
@@ -68,8 +72,6 @@ namespace Insta.Web.Controllers
             }
 
             var visionAnalysis = await _imageProcessor.ProcessPhoto(originalContent);
-
-            
 
             await _repository.Add(new Domain.Photo
             {
@@ -102,7 +104,7 @@ namespace Insta.Web.Controllers
             {
                 Id = photo.Id,
                 Name = photo.Name,
-                ThumbnailLocation = $"/api/photo/thumbnail/{photo.Id}"
+                ThumbnailLocation = $"/api/photo/{photo.Id}/thumbnail"
             };
 
         // TODO: move to mapper
@@ -112,7 +114,7 @@ namespace Insta.Web.Controllers
             {
                 Id = photo.Id,
                 Name = photo.Name,
-                OriginalLocation = $"/api/photo/original/{photo.Id}",
+                OriginalLocation = $"/api/photo/{photo.Id}/original",
                 ProcessingAnalysisResult = Convert(photo.VisionAnalysis)
             };
 
