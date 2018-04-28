@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Insta.Web.Models;
+using Microsoft.AspNetCore.Http;
 using Domain = Insta.Processing.Domain;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,15 +16,25 @@ namespace Insta.Web.Controllers
         };
 
         [HttpGet("{id}")]
-        public PhotoDetailed Get(int id)
+        public Result<PhotoDetailed> Get(int id)
         {
-            return MapToDetailed(Photos.First());
+            var photo = Photos.First();
+            photo.Id = id;
+
+            return Result<PhotoDetailed>.Success(MapToDetailed(photo));
         }
 
         [HttpGet]
-        public IEnumerable<Photo> WeatherForecasts()
+        public Result<IEnumerable<Photo>> GetAll()
         {
-            return Photos.Select(Map);
+            return Result<IEnumerable<Photo>>.Success(Photos.Select(Map));
+        }
+
+        // TODO: Fix Upload
+        [HttpPost]
+        public Result Upload(List<IFormFile> file)
+        {
+            return Result.Success();
         }
 
         private Photo Map(Domain.Photo photo) =>
@@ -43,6 +54,7 @@ namespace Insta.Web.Controllers
                 ProcessingAnalysisResult = Convert(photo.VisionAnalysis)
             };
 
+        // TODO: implement JSON->Object converter
         private ProcessingAnalysisResult Convert(string raw) =>
             new ProcessingAnalysisResult();
     }

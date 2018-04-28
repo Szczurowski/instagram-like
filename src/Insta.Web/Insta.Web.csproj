@@ -21,10 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\images\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Insta.Processing\Insta.Processing.csproj" />
   </ItemGroup>
 
