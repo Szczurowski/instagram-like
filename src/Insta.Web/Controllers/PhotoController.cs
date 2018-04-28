@@ -34,22 +34,10 @@ namespace Insta.Web.Controllers
         }
 
         [HttpGet("{Id}/original")]
-        public async Task<IActionResult> GetOriginal(int id)
-        {
-            var content = await _repository.GetGetOriginal(id);
-
-            // TODO: add ContentType to Entity
-            return File(content, "image/jpeg");
-        }
+        public async Task<IActionResult> GetOriginal(int id) => await GetBinary(id, _repository.GetGetOriginal);
 
         [HttpGet("{Id}/thumbnail")]
-        public async Task<IActionResult> GetThumbnail(int id)
-        {
-            var content = await _repository.GetGetThumbnail(id);
-
-            // TODO: add ContentType to Entity
-            return File(content, "image/jpeg");
-        }
+        public async Task<IActionResult> GetThumbnail(int id) => await GetBinary(id, _repository.GetGetThumbnail);
 
         [HttpGet]
         public async Task<Result<IEnumerable<Photo>>> GetAll()
@@ -81,6 +69,19 @@ namespace Insta.Web.Controllers
             });
 
             return Result.Success();
+        }
+
+        public async Task<IActionResult> GetBinary(int id, Func<int, Task<byte[]>> repositoryAccessor)
+        {
+            var content = await repositoryAccessor(id);
+
+            if (content == null)
+            {
+                return NotFound();
+            }
+
+            // TODO: add ContentType to Entity
+            return File(content, "image/jpeg");
         }
 
         // TODO: move to mapper
