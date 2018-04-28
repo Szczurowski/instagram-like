@@ -13,7 +13,7 @@ export class Home extends React.Component<RouteComponentProps<{}>, {}> {
             <h1>Hello, world!</h1>
 
             <div>
-               <input type="file" onChange={(e : React.ChangeEvent<HTMLInputElement>) => this.handleChange(e.target.files)} multiple />
+                <input type="file" onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.handleChange(e.target.files)} />
            </div>
         </div>;
     }
@@ -22,7 +22,12 @@ export class Home extends React.Component<RouteComponentProps<{}>, {}> {
         console.log(selectorFiles);
 
         if (selectorFiles != null) {
-            fetch('api/Photo', { body: selectorFiles[0], method: 'POST' })
+            const file = selectorFiles[0];
+            fetch('api/Photo',
+                    {
+                        body: file,
+                        method: 'POST'
+                    })
                 .then(response => {
                     if (!response.ok) {
                         console.log(response.statusText);
@@ -30,7 +35,9 @@ export class Home extends React.Component<RouteComponentProps<{}>, {}> {
                     return response.json() as Promise<{}>;
                 })
                 .then(data => {
-                    console.log('Data received' + data);
+                    console.log('Data received: ', data);
+                }).catch(error => {
+                    console.log(error);
                 });
         }
     }

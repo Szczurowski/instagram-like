@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Insta.Web.Models;
 using Microsoft.AspNetCore.Http;
 using Domain = Insta.Processing.Domain;
@@ -30,11 +33,23 @@ namespace Insta.Web.Controllers
             return Result<IEnumerable<Photo>>.Success(Photos.Select(Map));
         }
 
-        // TODO: Fix Upload
         [HttpPost]
-        public Result Upload(List<IFormFile> file)
+        public async Task<Result> Upload()
         {
+            var content = new byte[Request.ContentLength.GetValueOrDefault()];
+            using (var memory = new MemoryStream(content))
+            {
+                await Request.Body.CopyToAsync(memory);
+            }
+
             return Result.Success();
+        }
+
+        // TODO: Implement
+        [HttpGet("preview/{Id}")]
+        public Result<byte[]> Download(int id)
+        {
+            return Result<byte[]>.Failure("Not implemented yet");
         }
 
         private Photo Map(Domain.Photo photo) =>
