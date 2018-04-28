@@ -50,6 +50,17 @@ namespace Insta.Web.Controllers
         [HttpPost]
         public async Task<Result> Upload()
         {
+            var filename = Request.Headers["x-filename"];
+            if (string.IsNullOrEmpty(filename))
+            {
+                return Result.Failure("Missing filename");
+            }
+
+            if (Request.ContentLength == 0)
+            {
+                return Result.Failure("Missing file contents");
+            }
+
             var originalContent = new byte[Request.ContentLength.GetValueOrDefault()];
             using (var memory = new MemoryStream(originalContent))
             {
@@ -58,7 +69,7 @@ namespace Insta.Web.Controllers
 
             var visionAnalysis = await _imageProcessor.ProcessPhoto(originalContent);
 
-            var filename = Request.Headers["x-filename"];
+            
 
             await _repository.Add(new Domain.Photo
             {
