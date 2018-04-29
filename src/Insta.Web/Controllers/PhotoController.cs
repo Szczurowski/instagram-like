@@ -71,14 +71,18 @@ namespace Insta.Web.Controllers
                 await Request.Body.CopyToAsync(memory);
             }
 
-            var visionAnalysis = await _imageProcessor.ProcessPhoto(originalContent);
+            var visionAnalysisTask = _imageProcessor.ProcessPhoto(originalContent);
+            var thumbnailContentTask = _imageProcessor.CreateThumbnail(originalContent);
+
+            // run parallel independent APIs
+            await Task.WhenAll(visionAnalysisTask, thumbnailContentTask);
 
             await _repository.Add(new Domain.Photo
             {
                 Name = filename,
                 OriginalContent = originalContent,
-                ThumbnailContent = null,
-                VisionAnalysis = visionAnalysis
+                ThumbnailContent = thumbnailContentTask.Result,
+                VisionAnalysis = visionAnalysisTask.Result
             });
 
             return Result.Success();

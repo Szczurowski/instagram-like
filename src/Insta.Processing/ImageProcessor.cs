@@ -15,42 +15,46 @@ namespace Insta.Processing
             _webConfiguration = webConfiguration;
         }
 
-        public async Task<string> ProcessPhoto(byte[] photoBytes)
-        {
-            var uriBase = _webConfiguration.VisionApiUriBase;
-            var subscriptionKey = _webConfiguration.VisionApiSubscriptionKey;
+        private string uriBase => _webConfiguration.VisionApiUriBase;
+        private string subscriptionKey => _webConfiguration.VisionApiSubscriptionKey;
 
+        public async Task<string> ProcessPhoto(byte[] photoBytes) =>
+            await GetCloudContent(
+                photoBytes, "analyze", "visualFeatures=Description,Faces&language=en", x => x.ReadAsStringAsync());
+
+        // TODO: astract away dimensions into condiguration
+        public async Task<byte[]> CreateThumbnail(byte[] photoBytes) => 
+            await GetCloudContent(
+                photoBytes, "generateThumbnail", "width=200&height=150&smartCropping=true", x => x.ReadAsByteArrayAsync());
+
+        private async Task<TResult> GetCloudContent<TResult>(
+            byte[] photoBytes,
+            string apiName,
+            string requestParameters,
+            Func<HttpContent, Task<TResult>> resultFactory)
+        {
             using (var client = new HttpClient())
             {
-                // Request headers.
                 client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
 
-                // Request parameters. A third optional parameter is "details".
-                string requestParameters = "visualFeatures=Description,Faces&language=en";
-
-                // Assemble the URI for the REST API Call.
-                string uri = uriBase + "?" + requestParameters;
-
-                HttpResponseMessage response;
+                string uri = $"{uriBase}/{apiName}?{requestParameters}";
 
                 using (ByteArrayContent content = new ByteArrayContent(photoBytes))
                 {
-                    // This example uses content type "application/octet-stream".
-                    // The other content types you can use are "application/json" and "multipart/form-data".
                     content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
 
-                    // Execute the REST API call.
-                    response = await client.PostAsync(uri, content);
+                    var response = await client.PostAsync(uri, content);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Get the resulting data.
+                        var result = await resultFactory(response.Content);
+                        return result;
+                    }
 
-                    // Get the JSON response.
-                    return await response.Content.ReadAsStringAsync();
+                    var error = await response.Content.ReadAsStringAsync();
+                    throw new ApplicationException(error);
                 }
             }
-        }
-
-        public Task<byte[]> CreateThumbnail(byte[] photoBytes)
-        {
-            throw new System.NotImplementedException();
         }
     }
 }
