@@ -41,6 +41,7 @@ export class Home extends React.Component<RouteComponentProps<{}>, PhotoState> {
                     <tr>
                         <th>Id</th>
                         <th>Link</th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -48,6 +49,7 @@ export class Home extends React.Component<RouteComponentProps<{}>, PhotoState> {
                         <tr>
                             <td>{photo.id}</td>
                             <td><Link to={`/photoDetails/${photo.id}`}>{photo.name}</Link></td>
+                            <td><img src={photo.thumbnailLocation} alt={photo.name} /></td>
                         </tr>
                     )}
                     </tbody>
@@ -75,7 +77,11 @@ export class Home extends React.Component<RouteComponentProps<{}>, PhotoState> {
                 })
                 .then(data => {
                     console.log('Data received: ', data);
-                }).catch(error => {
+                })
+                .then(x => {
+                    // TODO: reload the data
+                })
+                .catch(error => {
                     console.log(error);
                 });
         }
