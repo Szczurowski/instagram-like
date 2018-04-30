@@ -95,6 +95,15 @@ namespace Insta.Web.Controllers
             });
         }
 
+        [HttpDelete("{id}")]
+        public async Task<Result> Delete(int id)
+        {
+            return await Shield(async () =>
+            {
+                await _repository.Delete(id);
+            });
+        }
+
         public async Task<IActionResult> GetBinary(int id, Func<int, Task<byte[]>> repositoryAccessor)
         {
             var content = await repositoryAccessor(id);

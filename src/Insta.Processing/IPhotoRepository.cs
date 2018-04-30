@@ -15,5 +15,7 @@ namespace Insta.Processing
         Task<byte[]> GetGetThumbnail(int id);
 
         Task Add(Photo photo);
+
+        Task Delete(int id);
     }
 }

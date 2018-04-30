@@ -27,7 +27,6 @@ export class Home extends React.Component<RouteComponentProps<{}>, PhotoState> {
         fetch('api/photo')
             .then(response => response.json() as Promise<Result<Photo[]>>)
             .then(({ content }) => {
-                console.log(content);
                 this.setState({ content, isLoading: false });
             });
     }
@@ -36,10 +35,8 @@ export class Home extends React.Component<RouteComponentProps<{}>, PhotoState> {
         const { content } = this.state;
 
         return <div>
-            <h1>Upload an image for analysis</h1>
-                   <RingLoader
-                       color={'#123abc'}
-                       loading={this.state.isLoading} />
+            <h2>Upload an image for analysis</h2>
+            <RingLoader color={'#123abc'} loading={this.state.isLoading} />
             
             <div style={{margin: 10}}>
                 <input type="file" onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.handleChange(e.target.files)} />

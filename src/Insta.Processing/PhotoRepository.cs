@@ -115,6 +115,23 @@ namespace Insta.Processing
             }
         }
 
+        public async Task Delete(int id)
+        {
+            var commandText = $@"DELETE FROM [dbo].[T_Photo] WHERE [{ParamId}] = @{ParamId}";
+
+            using (var connection = new SqlConnection(_webConfiguration.ConfigurationString))
+            {
+                using (var command = new SqlCommand(commandText, connection))
+                {
+                    connection.Open();
+
+                    command.Parameters.AddWithValue($"@{ParamId}", id);
+
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+        }
+
         private async Task<byte[]> GetBinaryValue(int id, string columnName)
         {
             var commandText = $@"SELECT [{columnName}] 

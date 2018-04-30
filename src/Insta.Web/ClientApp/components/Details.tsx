@@ -58,7 +58,6 @@ class Rectangle extends React.Component<RectangeProperties, {}> {
 
         const { top, left, width, height } = this.props.faceRectangle;
         const leftAdditional = (sizes.conWidth - sizes.imgWidth) / 2 / sizes.conWidth * 100;
-        console.log(`left: ${leftAdditional}`);
         return {
             top: this.computePercentage(top, sizes.conHeight ),
             left: this.computePercentage(left, sizes.conWidth, leftAdditional),
@@ -80,6 +79,7 @@ export class Details extends React.Component<RouteComponentProps<PhotoDetailedPa
         this.imageLoaded = this.imageLoaded.bind(this);
         this.referenceImage = this.referenceImage.bind(this);
         this.referenceCon = this.referenceCon.bind(this);
+        this.imageDeleting = this.imageDeleting.bind(this);
 
         this.state = {
             isLoading: true,
@@ -113,12 +113,12 @@ export class Details extends React.Component<RouteComponentProps<PhotoDetailedPa
         const imgAvailable = sizes != undefined;
         const { content: { name, originalLocation, processingAnalysisResult } } = this.state;
         const captions = processingAnalysisResult.description.captions;
-        //const text = processingAnalysisResult.description.captions.length > 0 ? processingAnalysisResult.description.captions[0].text : 'No caption';
         const faceRectangles = this.getFaces(processingAnalysisResult);
         
         return <div>
-                   <h2>Details</h2>
-                   <h3>Computer Vision Analysis Results of file <b>{name}</b></h3>
+            <h2>Details</h2>
+            <h3>Computer Vision Analysis Results of file <b>{name}</b></h3>
+            <button type="button" className="btn btn-danger" onClick={this.imageDeleting}>Delete</button>
 
             <div ref={this.referenceCon} style={{ position: "relative", textAlign: "center", margin: "0 auto" }}>
                 <div>
@@ -162,14 +162,33 @@ export class Details extends React.Component<RouteComponentProps<PhotoDetailedPa
     }
 
     imageLoaded(e: any) {
-        console.log('Image loaded');
         if (this.imageElement != null && this.conElement != null) {
             const imgWidth = this.imageElement.width;
             const conWidth = this.conElement.clientWidth;
             const conHeight = this.conElement.clientHeight;
-            console.log(`Width: ${imgWidth}, conWidth: ${conWidth}, conHeight: ${conHeight}`);
             this.setState({ sizes: { imgWidth, conWidth, conHeight }});
         }
+    }
+
+    imageDeleting() {
+        const { match: { params } } = this.props;
+        fetch(`api/Photo/${params.id}`,
+            {
+                method: 'DELETE',
+            })
+            .then(response => {
+                if (!response.ok) {
+                    console.log(response.statusText);
+                }
+                return response.json() as Promise<{}>;
+            })
+            .then(_ => {
+                this.props.history.push('/');
+            })
+            .catch(error => {
+                this.setState({ isLoading: false });
+                console.log(error);
+            });
     }
 
     referenceImage(elem: HTMLImageElement | null) {
