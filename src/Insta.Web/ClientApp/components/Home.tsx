@@ -2,6 +2,7 @@ import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import { Link } from "react-router-dom";
 import 'isomorphic-fetch';
+import { RingLoader } from 'react-spinners';
 import { Result } from "../types/common";
 import { Photo } from "../types/photo"
 
@@ -22,6 +23,7 @@ export class Home extends React.Component<RouteComponentProps<{}>, PhotoState> {
     }
 
     fetchAllPhotos() {
+        this.setState({ isLoading: true });
         fetch('api/photo')
             .then(response => response.json() as Promise<Result<Photo[]>>)
             .then(({ content }) => {
@@ -35,6 +37,9 @@ export class Home extends React.Component<RouteComponentProps<{}>, PhotoState> {
 
         return <div>
             <h1>Upload an image for analysis</h1>
+                   <RingLoader
+                       color={'#123abc'}
+                       loading={this.state.isLoading} />
             
             <div style={{margin: 10}}>
                 <input type="file" onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.handleChange(e.target.files)} />
@@ -52,6 +57,7 @@ export class Home extends React.Component<RouteComponentProps<{}>, PhotoState> {
     private handleChange(selectorFiles: FileList | null) {
         if (selectorFiles != null) {
             const file = selectorFiles[0];
+            this.setState({ isLoading: true });
             fetch('api/Photo',
                     {
                         body: file,
@@ -61,18 +67,17 @@ export class Home extends React.Component<RouteComponentProps<{}>, PhotoState> {
                         }
                     })
                 .then(response => {
+                    this.setState({ isLoading: false });
                     if (!response.ok) {
                         console.log(response.statusText);
                     }
                     return response.json() as Promise<{}>;
                 })
-                .then(data => {
-                    console.log('Data received: ', data);
-                })
-                .then(x => {
+                .then(_ => {
                     this.fetchAllPhotos();
                 })
                 .catch(error => {
+                    this.setState({ isLoading: false });
                     console.log(error);
                 });
         }

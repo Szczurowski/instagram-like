@@ -9,7 +9,7 @@ On development\build machine:
 4. Clone repository https://github.com/Szczurowski/instagram-like.git 
 5. From the cloned repository location (Location) run the *./sql-scripts/create-tables.sql* script on the Database
 6. Point the connection string located in file ./src/Insta.Web/appsettings.json on the Database
-6. From within the location execute:
+6. From within the ./src/Insta.Web execute:
 	- dotnet restore
 	- npm install
 	- dotnet run
@@ -19,4 +19,3 @@ On development\build machine:
 1. When ready for production execute:
 
 	- dotnet publish -c Release
-
