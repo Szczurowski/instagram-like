@@ -25,7 +25,8 @@ namespace Insta.Processing
 
         public async Task<IEnumerable<Photo>> GetAll()
         {
-            var commandText = $@"SELECT [{ParamId}], [{ParamName}] FROM [dbo].[T_Photo]";
+            var commandText = $@"SELECT [{ParamId}], [{ParamName}] FROM [dbo].[T_Photo]
+                                 ORDER BY [{ParamId}] DESC";
             var result = new List<Photo>();
 
             using (var connection = new SqlConnection(_webConfiguration.ConfigurationString))

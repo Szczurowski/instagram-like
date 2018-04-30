@@ -18,6 +18,10 @@ export class Home extends React.Component<RouteComponentProps<{}>, PhotoState> {
     }
 
     componentDidMount() {
+        this.fetchAllPhotos();
+    }
+
+    fetchAllPhotos() {
         fetch('api/photo')
             .then(response => response.json() as Promise<Result<Photo[]>>)
             .then(({ content }) => {
@@ -32,28 +36,15 @@ export class Home extends React.Component<RouteComponentProps<{}>, PhotoState> {
         return <div>
             <h1>Upload an image for analysis</h1>
             
-            <div>
+            <div style={{margin: 10}}>
                 <input type="file" onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.handleChange(e.target.files)} />
             </div>
             <div>
-                <table className="table">
-                    <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Link</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {content.map(photo => 
-                        <tr>
-                            <td>{photo.id}</td>
-                            <td><Link to={`/photoDetails/${photo.id}`}>{photo.name}</Link></td>
-                            <td><img src={photo.thumbnailLocation} alt={photo.name} /></td>
-                        </tr>
-                    )}
-                    </tbody>
-                </table>
+                {content.map(photo =>
+                    <Link to={`/photoDetails/${photo.id}`}>
+                        <img style={{ margin: 5 }} src={photo.thumbnailLocation} alt={photo.name} />
+                    </Link>
+                )}
             </div>
         </div>;
     }
@@ -79,7 +70,7 @@ export class Home extends React.Component<RouteComponentProps<{}>, PhotoState> {
                     console.log('Data received: ', data);
                 })
                 .then(x => {
-                    // TODO: reload the data
+                    this.fetchAllPhotos();
                 })
                 .catch(error => {
                     console.log(error);
