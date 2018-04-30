@@ -28,11 +28,14 @@ namespace Insta.Web.Controllers
         [HttpGet("{id}")]
         public async Task<Result<PhotoDetailed>> Get(int id)
         {
-            var photo = await _repository.Get(id);
+            return await Shield(async () =>
+            {
+                var photo = await _repository.Get(id);
 
-            var photoMapped = MapToDetailed(photo);
+                var photoMapped = MapToDetailed(photo);
 
-            return Result<PhotoDetailed>.Success(photoMapped);
+                return photoMapped;
+            });
         }
 
         [HttpGet("{Id}/original")]
@@ -44,11 +47,14 @@ namespace Insta.Web.Controllers
         [HttpGet]
         public async Task<Result<IEnumerable<Photo>>> GetAll()
         {
-            var photos = await _repository.GetAll();
+            return await Shield(async () =>
+            {
+                var photos = await _repository.GetAll();
 
-            var photosMapped = photos.Select(Map);
+                var photosMapped = photos.Select(Map);
 
-            return Result<IEnumerable<Photo>>.Success(photosMapped);
+                return photosMapped;
+            });
         }
 
         [HttpPost]
@@ -65,27 +71,28 @@ namespace Insta.Web.Controllers
                 return Result.Failure("Missing file contents");
             }
 
-            var originalContent = new byte[Request.ContentLength.GetValueOrDefault()];
-            using (var memory = new MemoryStream(originalContent))
+            return await Shield(async () =>
             {
-                await Request.Body.CopyToAsync(memory);
-            }
+                var originalContent = new byte[Request.ContentLength.GetValueOrDefault()];
+                using (var memory = new MemoryStream(originalContent))
+                {
+                    await Request.Body.CopyToAsync(memory);
+                }
 
-            var visionAnalysisTask = _imageProcessor.ProcessPhoto(originalContent);
-            var thumbnailContentTask = _imageProcessor.CreateThumbnail(originalContent);
+                var visionAnalysisTask = _imageProcessor.ProcessPhoto(originalContent);
+                var thumbnailContentTask = _imageProcessor.CreateThumbnail(originalContent);
 
-            // run parallel independent APIs
-            await Task.WhenAll(visionAnalysisTask, thumbnailContentTask);
+                // run parallel independent APIs
+                await Task.WhenAll(visionAnalysisTask, thumbnailContentTask);
 
-            await _repository.Add(new Domain.Photo
-            {
-                Name = filename,
-                OriginalContent = originalContent,
-                ThumbnailContent = thumbnailContentTask.Result,
-                VisionAnalysis = visionAnalysisTask.Result
+                await _repository.Add(new Domain.Photo
+                {
+                    Name = filename,
+                    OriginalContent = originalContent,
+                    ThumbnailContent = thumbnailContentTask.Result,
+                    VisionAnalysis = visionAnalysisTask.Result
+                });
             });
-
-            return Result.Success();
         }
 
         public async Task<IActionResult> GetBinary(int id, Func<int, Task<byte[]>> repositoryAccessor)
@@ -99,6 +106,52 @@ namespace Insta.Web.Controllers
 
             // TODO: add ContentType to Entity
             return File(content, "image/jpeg");
+        }
+
+        /// <summary>
+        /// Handles exceptions.
+        /// </summary>
+        /// <remarks>
+        /// Normally would be a part of BaseController but here we have only one
+        /// meaningfull Controller so let it be here.
+        /// </remarks>
+        private async Task<Result<TResult>> Shield<TResult>(Func<Task<TResult>> action)
+        {
+            try
+            {
+                var result = await action.Invoke();
+
+                return Result<TResult>.Success(result);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+
+                return Result<TResult>.Failure(e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Handles exceptions.
+        /// </summary>
+        /// <remarks>
+        /// Normally would be a part of BaseController but here we have only one
+        /// meaningfull Controller so let it be here.
+        /// </remarks>
+        private async Task<Result> Shield(Func<Task> action)
+        {
+            try
+            {
+                await action.Invoke();
+
+                return Result.Success();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+
+                return Result.Failure(e.Message);
+            }
         }
 
         // TODO: move to mapper

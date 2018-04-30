@@ -12,7 +12,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sql-scripts", "sql-scripts"
 		..\sql-scripts\create-tables.sql = ..\sql-scripts\create-tables.sql
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Insta.Common", "Insta.Common\Insta.Common.csproj", "{42564A88-45F6-458F-BB98-8DC3F94AA326}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Insta.Common", "Insta.Common\Insta.Common.csproj", "{42564A88-45F6-458F-BB98-8DC3F94AA326}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B9C08BF4-2687-4DCB-A10A-4AE7F23D91DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Insta.Web.Tests", "Insta.Web.Tests\Insta.Web.Tests.csproj", "{7199F619-C42C-489C-8961-7AEC7EBAC8CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,9 +36,16 @@ Global
 		{42564A88-45F6-458F-BB98-8DC3F94AA326}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42564A88-45F6-458F-BB98-8DC3F94AA326}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42564A88-45F6-458F-BB98-8DC3F94AA326}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7199F619-C42C-489C-8961-7AEC7EBAC8CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7199F619-C42C-489C-8961-7AEC7EBAC8CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7199F619-C42C-489C-8961-7AEC7EBAC8CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7199F619-C42C-489C-8961-7AEC7EBAC8CD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7199F619-C42C-489C-8961-7AEC7EBAC8CD} = {B9C08BF4-2687-4DCB-A10A-4AE7F23D91DF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7CAE58D5-62E3-40CE-A364-2DED9F90563E}
